@@ -97,9 +97,6 @@ SOP_DualStar::~SOP_DualStar() {
 OP_ERROR
 SOP_DualStar::cookMySop(OP_Context &context)
 {
-
-    cr_plugin_update(ctx);  // does not handle if the guest dso does not exists
-   
     // We must lock our inputs before we try to access their geometry.
     // OP_AutoLockInputs will automatically unlock our inputs when we return.
     // NOTE: Don't call unlockInputs yourself when using this!
@@ -109,11 +106,15 @@ SOP_DualStar::cookMySop(OP_Context &context)
 
     duplicateSource(0, context);
 
+    // Pass relevant data to plugin
+    // This needs extra bookkiping (wrap into struct) if more inputs are used etc;
+    ctx.userdata = (void*)gdp;
+
     // Start the interrupt server
     buildStar(gdp, context);
 
-    // cout << gdp->getNumPoints() <<endl;
-    
+    cr_plugin_update(ctx);  // does not handle if the guest dso does not exists
+
     return error();
 }
 

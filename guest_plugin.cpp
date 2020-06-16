@@ -11,10 +11,16 @@ static int     g_failure = 0;
 static unsigned int CR_STATE g_version = 0;
 // static HostData     *g_data = nullptr; // hold user data kept on host and received from host
 
-int add(int a){
-    cout << "plugin..."<<endl;
+void cook(GU_Detail * gdp){
+    cout <<"guess points" << gdp->getNumPoints() <<endl;
 
-    return a + 1;
+    // Uncomment, rebulid and disable/enable the SOP to add a point attribute at runtime.
+    
+    // GA_RWHandleV3 n_h(gdp, GA_ATTRIB_POINT, "N");
+    // if (!n_h.isValid()){
+    //     n_h = GA_RWHandleV3(gdp->addFloatTuple(GA_ATTRIB_POINT,  GEO_STD_ATTRIB_NORMAL, 3));
+    // }
+
 }
 
 CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
@@ -23,8 +29,8 @@ CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
     g_version = ctx->version;
     g_failure = ctx->failure;
 
-    // GU_Detail &gdp = ctx->userdata->gdp;
-    int a=0;
+    GU_Detail *gdp = (GU_Detail*)ctx->userdata;
+
     switch (operation) {
         case CR_LOAD:
             // some action
@@ -36,7 +42,7 @@ CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
             // some action
             return 0;
         case CR_STEP:
-            add(1);
+            cook(gdp);
             return 0;
     }
 

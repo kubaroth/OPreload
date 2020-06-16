@@ -33,7 +33,7 @@ namespace HDK_Sample {
 
     private:
         cr_plugin ctx;  //hotreload
-        
+
         /// The following list of accessors simplify evaluating the parameters
         /// of the SOP.
         int         DIVISIONS(fpreal t)     { return evalInt  ("divs", 0, t); }
