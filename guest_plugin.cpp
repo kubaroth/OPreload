@@ -1,11 +1,17 @@
 #include <iostream>
 
 #include <SOP/SOP_Node.h>
+#include <OP/OP_Director.h>
 
 #include "cr.h"
 
 using std::cout;
 using std::endl;
+
+struct Data{
+    void * gdp;
+    void * node;
+};
 
 static int     g_failure = 0;
 static unsigned int CR_STATE g_version = 0;
@@ -29,8 +35,10 @@ CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
     g_version = ctx->version;
     g_failure = ctx->failure;
 
-    GU_Detail *gdp = (GU_Detail*)ctx->userdata;
-
+    Data * data = (Data*)ctx->userdata;
+    GU_Detail *gdp = (GU_Detail*)data->gdp;
+    SOP_Node *node = (SOP_Node*)data->node;
+    
     switch (operation) {
         case CR_LOAD:
             // some action
@@ -43,6 +51,32 @@ CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
             return 0;
         case CR_STEP:
             cook(gdp);
+
+            auto parent = node->getParent();
+            cout << "___" << node->getItemType() << " " << node->getOpType()<< endl;
+            cout << "''''AAAAAA: " << node->getNetName() << " " << parent->getItemType() << " " << parent->getOpType() << endl;
+            UT_String s;
+            node->getPathWithSubnet(s);
+            cout << s <<endl;
+            // parent->getPathWithSubnet(s);
+            // cout << s <<endl;
+            OP_Director * director = OPgetDirector();
+
+            cout << "qqq "<< node->getInternalOperator()<<endl;
+                
+            // OP_OperatorTable * table = node->getOperatorTable();
+            // OP_Operator * op;
+            // director->getTableAndOperator(s, table, op);
+            // cout << table << " " <<endl;
+/*
+
+OP_Director::getTableAndOperator 	( 	const char *  	path,
+		OP_OperatorTable *&  	table,
+		OP_Operator *&  	op,
+		const OP_Node *  	relativetonode = 0
+*/
+
+            
             return 0;
     }
 

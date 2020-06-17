@@ -43,6 +43,7 @@ set(HOUDINI_LIBRARIES
        HoudiniOP1
        HoudiniOP2
        HoudiniOP3
+       HoudiniOP4
        HoudiniSIM
        HoudiniGEO
        HoudiniPRM

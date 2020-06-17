@@ -25,6 +25,8 @@ using std::endl;
 //
 
 
+static OP_OperatorTable *g_table;
+
 ///
 /// newSopOperator is the hook that Houdini grabs from this dll
 /// and invokes to register the SOP.  In this case we add ourselves
@@ -33,7 +35,7 @@ using std::endl;
 void
 newSopOperator(OP_OperatorTable *table)
 {
-    table->addOperator(new OP_Operator(
+    OP_Operator * op = new OP_Operator(
                            "hdk_dualstar",                 // Internal name
                            "Dual Star",                     // UI name
                            SOP_DualStar::myConstructor,    // How to build the SOP
@@ -43,7 +45,13 @@ newSopOperator(OP_OperatorTable *table)
                            0,      // Local variables
                            OP_FLAG_GENERATOR,        // Flag it as generator
                            0,  // labels
-                           2));    // Outputs.
+                           2);    // Outputs.
+
+    std::cout << "Addding new operator: " << "HDK star" << std::endl;
+    table->addOperator(op);
+
+    g_table = table;
+    std::cout << "g_table " << g_table << std::endl;
 }
 
 static PRM_Name     negativeName("nradius", "Negative Radius");
@@ -97,6 +105,12 @@ SOP_DualStar::~SOP_DualStar() {
 OP_ERROR
 SOP_DualStar::cookMySop(OP_Context &context)
 {
+    // g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload.so");  // this method is obsolete? and does not work 
+    // g_table->requestReload();
+    
+    // std::cout << "ASASA----------" <<std::endl;
+    
+    
     // We must lock our inputs before we try to access their geometry.
     // OP_AutoLockInputs will automatically unlock our inputs when we return.
     // NOTE: Don't call unlockInputs yourself when using this!
@@ -106,9 +120,22 @@ SOP_DualStar::cookMySop(OP_Context &context)
 
     duplicateSource(0, context);
 
+    using std::cout;
+    using std::endl;
+
+    cout << "g_table cook " << g_table <<endl;
+    
+    OP_OperatorTable * table = getOperatorTable();
+    cout << table <<endl;
+    cout << "qqq222  "<< this->getInternalOperator()<<endl;
+    // const char * aaa = getOpTypeFromTable(table);
     // Pass relevant data to plugin
     // This needs extra bookkiping (wrap into struct) if more inputs are used etc;
-    ctx.userdata = (void*)gdp;
+    Data data;
+
+    data.gdp = (void*)gdp;
+    data.node = (void*)this;
+    ctx.userdata = (void*)(&data);
 
     // Start the interrupt server
     buildStar(gdp, context);

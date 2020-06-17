@@ -6,6 +6,11 @@
 
 const char *plugin = PLUGIN_DIR "/" CR_PLUGIN("guest_plugin");
 
+struct Data{
+    void * gdp;
+    void * node;
+};
+
 namespace HDK_Sample {
     class SOP_DualStar : public SOP_Node
     {
