@@ -19,6 +19,16 @@
 using std::cout;
 using std::endl;
 
+#define CR_HOST CR_UNSAFE
+#include "cr.h"
+
+const char *plugin = PLUGIN_DIR "/" CR_PLUGIN("guest_plugin");
+
+struct Data{
+    void * director;
+    void * op;
+};
+
 class SOP_DualStar;
 
 //
@@ -29,7 +39,7 @@ class SOP_DualStar;
 //
 
 
-static OP_OperatorTable *g_table;
+ static OP_OperatorTable *g_table;
 static OP_Operator *g_op;
 static cr_plugin g_ctx;  //hotreload
 
@@ -46,11 +56,24 @@ OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
     
     // g_table->removeOperator(g_op);  // once remove we need to add it here...
 
-    // g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload.so");  // this method is obsolete? and does not work
+    g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload01.so");  // this method is obsolete? and does not work
 
     // g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload.so");
     
     // g_table->requestReload();
+
+
+    OP_Operator * op = new OP_Operator(
+        "hdk_dualstar1",                 // Internal name
+        "Dual Star",                     // UI name
+        SOP_DualStar::myConstructor,    // How to build the SOP
+        SOP_DualStar::myTemplateList,   // My parameters
+        1,                          // Min # of sources
+        1,                          // Max # of sources
+        0,      // Local variables
+        OP_FLAG_GENERATOR,        // Flag it as generator
+        0,  // labels
+        2);    // Outputs.
 
     
     return UT_ERROR_NONE;
@@ -167,7 +190,7 @@ SOP_DualStar::cookMySop(OP_Context &context)
     using std::endl;
 
     
-    cout << "!!!!g_table cook " << g_table <<endl;
+    cout << "!!!!!g_table cook " << g_table <<endl;
 
     
     OP_OperatorTable * table = getOperatorTable();
@@ -189,6 +212,8 @@ SOP_DualStar::cookMySop(OP_Context &context)
     cout << "table thru director: " << table2 << " " << op << endl;
     if (op)
         cout << "op name:" << op->getName() << endl;
+
+    // const UT_StringHolder& type_name = getOperator()->getName();
 
     
     // Start the interrupt server

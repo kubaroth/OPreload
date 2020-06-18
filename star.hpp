@@ -1,15 +1,6 @@
 #pragma once
 #include <SOP/SOP_Node.h>
 
-#define CR_HOST CR_UNSAFE
-#include "cr.h"
-
-const char *plugin = PLUGIN_DIR "/" CR_PLUGIN("guest_plugin");
-
-struct Data{
-    void * director;
-    void * op;
-};
 
 class SOP_DualStar : public SOP_Node
     {

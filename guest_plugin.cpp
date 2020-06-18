@@ -3,6 +3,8 @@
 #include <SOP/SOP_Node.h>
 #include <OP/OP_Director.h>
 
+// #include "star.hpp"
+
 #include "cr.h"
 
 using std::cout;
@@ -39,6 +41,19 @@ CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
             return 0;
         case CR_STEP:
             cout << "plugin operator: " << op << endl;
+
+            ///// not working
+            // OP_Operator * opp = new OP_Operator(
+            //     "hdk_dualstar",                 // Internal name
+            //     "Dual Star",                     // UI name
+            //     SOP_DualStar::myConstructor,    // How to build the SOP
+            //     SOP_DualStar::myTemplateList,   // My parameters
+            //     1,                          // Min # of sources
+            //     1,                          // Max # of sources
+            //     0,      // Local variables
+            //     OP_FLAG_GENERATOR,        // Flag it as generator
+            //     0,  // labels
+            //     2);    // Outputs.
             return 0;
     }
 
