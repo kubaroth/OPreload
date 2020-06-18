@@ -39,7 +39,7 @@ class SOP_DualStar;
 //
 
 
- static OP_OperatorTable *g_table;
+ static OP_OperatorTable *g_table = NULL;
 static OP_Operator *g_op;
 static cr_plugin g_ctx;  //hotreload
 
@@ -51,21 +51,22 @@ OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
     std::cout << g_table << std::endl;
     std::cout << dir << std::endl;
 
-    cr_plugin_update(g_ctx);  // does not handle if the guest dso does not exists
-
+    // const UT_StringRef& name = g_op->getName();
+    // cout << "g_op name: " << name.c_str() <<endl;
+    // g_table->setOpRename(name.c_str(), "hdk_dualstar1", &std::cout);
     
     // g_table->removeOperator(g_op);  // once remove we need to add it here...
 
-    g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload01.so");  // this method is obsolete? and does not work
+    g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload1.so");  // this method is obsolete? and does not work
 
-    // g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload.so");
+    // g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload1.so");
     
-    // g_table->requestReload();
+  
 
 
     OP_Operator * op = new OP_Operator(
         "hdk_dualstar1",                 // Internal name
-        "Dual Star",                     // UI name
+        "Dual Star1",                     // UI name
         SOP_DualStar::myConstructor,    // How to build the SOP
         SOP_DualStar::myTemplateList,   // My parameters
         1,                          // Min # of sources
@@ -75,7 +76,9 @@ OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
         0,  // labels
         2);    // Outputs.
 
-    
+    g_table->addOperator(op);
+    g_table->requestReload();
+      
     return UT_ERROR_NONE;
 }
 
@@ -87,45 +90,42 @@ OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
 void
 newSopOperator(OP_OperatorTable *table)
 {
-    // TODO: not sure whre to close this
-    //       cr_plugin_close(ctx);
-    cr_plugin_open(g_ctx, plugin); 
 
+    if (!g_table){
+        OP_Operator * op = new OP_Operator(
+            "hdk_dualstar",                 // Internal name
+            "Dual Star",                     // UI name
+            SOP_DualStar::myConstructor,    // How to build the SOP
+            SOP_DualStar::myTemplateList,   // My parameters
+            1,                          // Min # of sources
+            1,                          // Max # of sources
+            0,      // Local variables
+            OP_FLAG_GENERATOR,        // Flag it as generator
+            0,  // labels
+            2);    // Outputs.
+
+        std::cout << "Addding new operator: " << "HDK star" << std::endl;
+        table->addOperator(op);
+        g_op = op;
+
+        auto lambda = [](){
+            std::cout << "This is my callback" << std::endl;      
+        };
+        // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
+
+        OP_Director * dir = OPgetDirector();
+        const char * abc =  "abc";    
+        dir->setSaveCallback(aaa, (void*)abc);
+
+        g_table = table;
+        
+    }
+    else{
+        cout << "let's reuse " <<endl;
+    }
+    
 
     
-    OP_Operator * op = new OP_Operator(
-                           "hdk_dualstar",                 // Internal name
-                           "Dual Star",                     // UI name
-                           SOP_DualStar::myConstructor,    // How to build the SOP
-                           SOP_DualStar::myTemplateList,   // My parameters
-                           1,                          // Min # of sources
-                           1,                          // Max # of sources
-                           0,      // Local variables
-                           OP_FLAG_GENERATOR,        // Flag it as generator
-                           0,  // labels
-                           2);    // Outputs.
-
-    std::cout << "Addding new operator: " << "HDK star" << std::endl;
-    table->addOperator(op);
-    g_op = op;
-
-    OP_Director * dir = OPgetDirector();
-    auto lambda = [](){
-        std::cout << "This is my callback" << std::endl;      
-    };
-    // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
-    const char * abc =  "abc";
-
-    Data data;
-
-    data.director = (void*)dir;
-    data.op = (void*)op;
-    g_ctx.userdata = (void*)(&data);
-
-    
-    dir->setSaveCallback(aaa, (void*)abc);
-    
-    g_table = table;
     std::cout << "g_table " << g_table << std::endl;
 }
 
@@ -191,6 +191,7 @@ SOP_DualStar::cookMySop(OP_Context &context)
 
     
     cout << "!!!!!g_table cook " << g_table <<endl;
+    // cout << "++++!!!!!g_table cook " << g_table <<endl;
 
     
     OP_OperatorTable * table = getOperatorTable();
@@ -213,7 +214,9 @@ SOP_DualStar::cookMySop(OP_Context &context)
     if (op)
         cout << "op name:" << op->getName() << endl;
 
-    // const UT_StringHolder& type_name = getOperator()->getName();
+    auto parent = getParent();
+    const UT_StringHolder& type_name = parent->getOperator()->getName();
+    cout << "___" << type_name <<endl;
 
     
     // Start the interrupt server
