@@ -34,6 +34,8 @@ add_definitions(
        -D_FILE_OFFSET_BITS=64
        -DGCC4
        -DGCC3
+       -DBOOST_SYSTEM_NO_DEPRECATED # https://stackoverflow.com/a/30877725
+       -DBOOST_NO_CXX11_SCOPED_ENUMS=1 # https://stackoverflow.com/a/35007213
        )
 
 set(HOUDINI_LIBRARIES
@@ -49,6 +51,7 @@ set(HOUDINI_LIBRARIES
        HoudiniPRM
        HoudiniRAY
        hboost_system
+       hboost_filesystem
        tbb
        
        # GLU 

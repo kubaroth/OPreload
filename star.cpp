@@ -13,7 +13,7 @@
 #include <limits.h>
 #include <OP/OP_Director.h>
 
-
+#include <boost/filesystem.hpp>
 #include <UT/UT_Error.h>
 
 using std::cout;
@@ -55,30 +55,32 @@ OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
     // cout << "g_op name: " << name.c_str() <<endl;
     // g_table->setOpRename(name.c_str(), "hdk_dualstar1", &std::cout);
     
-    // g_table->removeOperator(g_op);  // once remove we need to add it here...
+    g_table->removeOperator(g_op);  // once remove we need to add it here...
 
-    g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload1.so");  // this method is obsolete? and does not work
-
-    // g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload1.so");
-    
-  
-
-
-    OP_Operator * op = new OP_Operator(
-        "hdk_dualstar1",                 // Internal name
-        "Dual Star1",                     // UI name
-        SOP_DualStar::myConstructor,    // How to build the SOP
-        SOP_DualStar::myTemplateList,   // My parameters
-        1,                          // Min # of sources
-        1,                          // Max # of sources
-        0,      // Local variables
-        OP_FLAG_GENERATOR,        // Flag it as generator
-        0,  // labels
-        2);    // Outputs.
-
-    g_table->addOperator(op);
+    // g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload1.so");  // this method is obsolete? and does not work
     g_table->requestReload();
-      
+    g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload.so");
+    g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload1.so");
+    g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload2.so");
+
+
+    namespace fs = boost::filesystem;
+    fs::path someDir("/home/kuba/PRJ/houdini_reload/__build/");
+    // fs::directory_iterator end_iter;
+
+    // typedef std::multimap<std::time_t, fs::path> result_set_t;
+    // result_set_t result_set;
+
+    // if ( fs::exists(someDir) && fs::is_directory(someDir)){
+    //     for( fs::directory_iterator dir_iter(someDir) ; dir_iter != end_iter ; ++dir_iter) {
+    //         if (fs::is_regular_file(dir_iter->status()) ){
+    //             result_set.insert(result_set_t::value_type(fs::last_write_time(dir_iter->path()), *dir_iter));
+    //         }
+    //     }
+    // }
+    
+
+    
     return UT_ERROR_NONE;
 }
 
@@ -91,42 +93,33 @@ void
 newSopOperator(OP_OperatorTable *table)
 {
 
-    if (!g_table){
-        OP_Operator * op = new OP_Operator(
-            "hdk_dualstar",                 // Internal name
-            "Dual Star",                     // UI name
-            SOP_DualStar::myConstructor,    // How to build the SOP
-            SOP_DualStar::myTemplateList,   // My parameters
-            1,                          // Min # of sources
-            1,                          // Max # of sources
-            0,      // Local variables
-            OP_FLAG_GENERATOR,        // Flag it as generator
-            0,  // labels
-            2);    // Outputs.
+    OP_Operator * op = new OP_Operator(
+        "hdk_dualstar",                 // Internal name
+        "Dual Star",                     // UI name
+        SOP_DualStar::myConstructor,    // How to build the SOP
+        SOP_DualStar::myTemplateList,   // My parameters
+        1,                          // Min # of sources
+        1,                          // Max # of sources
+        0,      // Local variables
+        OP_FLAG_GENERATOR,        // Flag it as generator
+        0,  // labels
+        2);    // Outputs.
 
-        std::cout << "Addding new operator: " << "HDK star" << std::endl;
-        table->addOperator(op);
-        g_op = op;
+    std::cout << "Addding new operator: " << "HDK star" << std::endl;
+    table->addOperator(op);
+    g_op = op;
 
-        auto lambda = [](){
-            std::cout << "This is my callback" << std::endl;      
-        };
-        // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
+    auto lambda = [](){
+        std::cout << "This is my callback" << std::endl;      
+    };
+    // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
 
-        OP_Director * dir = OPgetDirector();
-        const char * abc =  "abc";    
-        dir->setSaveCallback(aaa, (void*)abc);
+    OP_Director * dir = OPgetDirector();
+    const char * abc =  "abc";    
+    dir->setSaveCallback(aaa, (void*)abc);
 
-        g_table = table;
+    g_table = table;
         
-    }
-    else{
-        cout << "let's reuse " <<endl;
-    }
-    
-
-    
-    std::cout << "g_table " << g_table << std::endl;
 }
 
 static PRM_Name     negativeName("nradius", "Negative Radius");
@@ -190,8 +183,8 @@ SOP_DualStar::cookMySop(OP_Context &context)
     using std::endl;
 
     
-    cout << "!!!!!g_table cook " << g_table <<endl;
-    // cout << "++++!!!!!g_table cook " << g_table <<endl;
+    cout << "g_table cook " << g_table <<endl;
+    // cout << "+++++++g_table cook " << g_table <<endl;
 
     
     OP_OperatorTable * table = getOperatorTable();

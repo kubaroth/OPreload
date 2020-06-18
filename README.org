@@ -1,4 +1,4 @@
-Update state of the SOP's gdp at runtime. With a core logic moved to and external reloadable dso. Based on the original ImGui based implementation https://github.com/fungos/cr
+A custom HDK operator example with an option to reload changes at runtime, to retain the state of the loaded scene.
 
 ** Build:
 Update CMake to point to Houdini installation directory ($HFS).
@@ -10,84 +10,5 @@ cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/houdini18.0/dso
 make install
 #+END_SRC
 
-** Adding plugin - breakdown of changes:
-*** host (.hpp)
-Include cr.h, define the host and specify path to the guest dso to be reloaded at runtime.
-#+BEGIN_SRC cpp
-#define CR_HOST CR_UNSAFE
-#include "cr.h"
-const char *plugin = PLUGIN_DIR "/" CR_PLUGIN("guest_plugin");
-#+END_SRC
-
-Add context.
-#+BEGIN_SRC cpp
-    private:
-        cr_plugin ctx;
-#+END_SRC
-
-*** host (.cpp)
-#+BEGIN_SRC cpp
-OP_ERROR
-SOP_DualStar::cookMySop(OP_Context &context)
-{
-...
-    duplicateSource(0, context);
-
-    ctx.userdata = (void*)gdp;
-    cr_plugin_update(ctx);   // core logic
-...
-}
-
-#+END_SRC
-*** guest (.cpp)
-Handle different stages in cr_main()
-#+BEGIN_SRC cpp
-
-#include <iostream>
-
-#include <SOP/SOP_Node.h>
-
-#include "cr.h"
-
-using std::cout;
-using std::endl;
-
-static int     g_failure = 0;
-static unsigned int CR_STATE g_version = 0;
-
-void cook(GU_Detail * gdp){
-    cout <<"guess points" << gdp->getNumPoints() <<endl;
-}
-
-CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
-    // assert(ctx);
-    // g_data = (HostData *)ctx->userdata;
-    g_version = ctx->version;
-    g_failure = ctx->failure;
-
-    GU_Detail *gdp = (GU_Detail*)ctx->userdata;
-
-    switch (operation) {
-        case CR_LOAD:
-            // some action
-            return 0;
-        case CR_UNLOAD:
-            // if needed, save stuff to pass over to next instance
-            return 0;
-        case CR_CLOSE:
-            // some action
-            return 0;
-        case CR_STEP:
-            cook(gdp);  // core logic
-            return 0;
-    }
-
-    return 0;
-}
-
-#+END_SRC
 ** NOTES:
-- This setup only is aimed for development and only does core logic most likely to be placed in cook SOP. No updates of parameters etc.
-- In order to reload disable/enable Node's flag.
-- Currently the simplest use case is presented where only GU_Detail pointer is passed to the guest. Further bookkeeping will be required if the host has more inputs etc.
-- Note that CMake configures a path for the guest plugin (PLUGIN_DIR) which in turn is looked up by the host. This means on subsequent runs no install is required. The down side - this is only to be used for the dev purposes.
+Houdini OP_OperatorTable - does not handle reloading .so files. Once path is loaded there is not easy way (that I know of) to dealocate it. A dumb workaround is to on every build increase the dso file name and tell Houdini to load the latest .so (which contains same symbols). This should do the trick to update operator in the current session.
