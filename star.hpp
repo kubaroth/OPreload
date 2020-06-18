@@ -11,8 +11,7 @@ struct Data{
     void * op;
 };
 
-namespace HDK_Sample {
-    class SOP_DualStar : public SOP_Node
+class SOP_DualStar : public SOP_Node
     {
     public:
         static OP_Node      *myConstructor(OP_Network*, const char *,
@@ -48,5 +47,4 @@ namespace HDK_Sample {
         fpreal  CENTERZ(fpreal t)   { return evalFloat("t", 2, t); }
         int         ORIENT()        { return evalInt  ("orient", 0, 0); }
 
-    };
-} // End HDK_Sample namespace
+};

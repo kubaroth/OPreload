@@ -16,10 +16,10 @@
 
 #include <UT/UT_Error.h>
 
-using namespace HDK_Sample;
 using std::cout;
 using std::endl;
 
+class SOP_DualStar;
 
 //
 // Help is stored in a "wiki" style text file.  This text file should be copied
