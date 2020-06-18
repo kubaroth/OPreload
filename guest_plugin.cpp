@@ -9,25 +9,13 @@ using std::cout;
 using std::endl;
 
 struct Data{
-    void * gdp;
-    void * node;
+    void * director;
+    void * op;
 };
 
 static int     g_failure = 0;
 static unsigned int CR_STATE g_version = 0;
 // static HostData     *g_data = nullptr; // hold user data kept on host and received from host
-
-void cook(GU_Detail * gdp){
-    cout <<"guess points" << gdp->getNumPoints() <<endl;
-
-    // Uncomment, rebulid and disable/enable the SOP to add a point attribute at runtime.
-    
-    // GA_RWHandleV3 n_h(gdp, GA_ATTRIB_POINT, "N");
-    // if (!n_h.isValid()){
-    //     n_h = GA_RWHandleV3(gdp->addFloatTuple(GA_ATTRIB_POINT,  GEO_STD_ATTRIB_NORMAL, 3));
-    // }
-
-}
 
 CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
     // assert(ctx);
@@ -36,8 +24,8 @@ CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
     g_failure = ctx->failure;
 
     Data * data = (Data*)ctx->userdata;
-    GU_Detail *gdp = (GU_Detail*)data->gdp;
-    SOP_Node *node = (SOP_Node*)data->node;
+    OP_Director *dir = (OP_Director*)data->director;
+    OP_Operator *op = (OP_Operator*)data->op;
     
     switch (operation) {
         case CR_LOAD:
@@ -50,33 +38,7 @@ CR_EXPORT int cr_main(cr_plugin *ctx, cr_op operation) {
             // some action
             return 0;
         case CR_STEP:
-            cook(gdp);
-
-            auto parent = node->getParent();
-            cout << "___" << node->getItemType() << " " << node->getOpType()<< endl;
-            cout << "''''AAAAAA: " << node->getNetName() << " " << parent->getItemType() << " " << parent->getOpType() << endl;
-            UT_String s;
-            node->getPathWithSubnet(s);
-            cout << s <<endl;
-            // parent->getPathWithSubnet(s);
-            // cout << s <<endl;
-            OP_Director * director = OPgetDirector();
-
-            cout << "qqq "<< node->getInternalOperator()<<endl;
-                
-            // OP_OperatorTable * table = node->getOperatorTable();
-            // OP_Operator * op;
-            // director->getTableAndOperator(s, table, op);
-            // cout << table << " " <<endl;
-/*
-
-OP_Director::getTableAndOperator 	( 	const char *  	path,
-		OP_OperatorTable *&  	table,
-		OP_Operator *&  	op,
-		const OP_Node *  	relativetonode = 0
-*/
-
-            
+            cout << "plugin operator: " << op << endl;
             return 0;
     }
 

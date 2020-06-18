@@ -7,8 +7,8 @@
 const char *plugin = PLUGIN_DIR "/" CR_PLUGIN("guest_plugin");
 
 struct Data{
-    void * gdp;
-    void * node;
+    void * director;
+    void * op;
 };
 
 namespace HDK_Sample {
@@ -37,8 +37,6 @@ namespace HDK_Sample {
                           OP_Context &context);
 
     private:
-        cr_plugin ctx;  //hotreload
-
         /// The following list of accessors simplify evaluating the parameters
         /// of the SOP.
         int         DIVISIONS(fpreal t)     { return evalInt  ("divs", 0, t); }

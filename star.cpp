@@ -31,6 +31,8 @@ using std::endl;
 
 static OP_OperatorTable *g_table;
 static OP_Operator *g_op;
+static cr_plugin g_ctx;  //hotreload
+
 
 OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
 
@@ -39,26 +41,16 @@ OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
     std::cout << g_table << std::endl;
     std::cout << dir << std::endl;
 
+    cr_plugin_update(g_ctx);  // does not handle if the guest dso does not exists
+
+    
     // g_table->removeOperator(g_op);  // once remove we need to add it here...
 
-    g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload.so");  // this method is obsolete? and does not work 
-    g_table->requestReload();
+    // g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload.so");  // this method is obsolete? and does not work
 
-    // OP_Operator * op = new OP_Operator(
-    //                        "hdk_dualstar",                 // Internal name
-    //                        "Dual Star",                     // UI name
-    //                        SOP_DualStar::myConstructor,    // How to build the SOP
-    //                        SOP_DualStar::myTemplateList,   // My parameters
-    //                        1,                          // Min # of sources
-    //                        1,                          // Max # of sources
-    //                        0,      // Local variables
-    //                        OP_FLAG_GENERATOR,        // Flag it as generator
-    //                        0,  // labels
-    //                        2);    // Outputs.
-
-    // std::cout << "Addding new operator: " << "HDK star" << std::endl;
-    // g_table->addOperator(op);
-    // g_op = op;
+    // g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload.so");
+    
+    // g_table->requestReload();
 
     
     return UT_ERROR_NONE;
@@ -72,6 +64,12 @@ OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
 void
 newSopOperator(OP_OperatorTable *table)
 {
+    // TODO: not sure whre to close this
+    //       cr_plugin_close(ctx);
+    cr_plugin_open(g_ctx, plugin); 
+
+
+    
     OP_Operator * op = new OP_Operator(
                            "hdk_dualstar",                 // Internal name
                            "Dual Star",                     // UI name
@@ -94,6 +92,14 @@ newSopOperator(OP_OperatorTable *table)
     };
     // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
     const char * abc =  "abc";
+
+    Data data;
+
+    data.director = (void*)dir;
+    data.op = (void*)op;
+    g_ctx.userdata = (void*)(&data);
+
+    
     dir->setSaveCallback(aaa, (void*)abc);
     
     g_table = table;
@@ -137,12 +143,10 @@ SOP_DualStar::SOP_DualStar(OP_Network *net, const char *name, OP_Operator *op)
 {
     // We do not manage our ids, so do not set the flag.
     // ctx.userdata = &data;
-    cr_plugin_open(ctx, plugin);
     cout << "Main Ctor" <<endl;
 }
 
 SOP_DualStar::~SOP_DualStar() {
-    cr_plugin_close(ctx);
 }
 
 OP_ERROR
@@ -163,7 +167,7 @@ SOP_DualStar::cookMySop(OP_Context &context)
     using std::endl;
 
     
-    cout << "g_table cook---- " << g_table <<endl;
+    cout << "!!!!g_table cook " << g_table <<endl;
 
     
     OP_OperatorTable * table = getOperatorTable();
@@ -187,16 +191,8 @@ SOP_DualStar::cookMySop(OP_Context &context)
         cout << "op name:" << op->getName() << endl;
 
     
-    Data data;
-
-    data.gdp = (void*)gdp;
-    data.node = (void*)this;
-    ctx.userdata = (void*)(&data);
-
     // Start the interrupt server
     buildStar(gdp, context);
-
-    cr_plugin_update(ctx);  // does not handle if the guest dso does not exists
 
     return error();
 }
