@@ -49,5 +49,6 @@ namespace HDK_Sample {
         fpreal  CENTERY(fpreal t)   { return evalFloat("t", 1, t); }
         fpreal  CENTERZ(fpreal t)   { return evalFloat("t", 2, t); }
         int         ORIENT()        { return evalInt  ("orient", 0, 0); }
+
     };
 } // End HDK_Sample namespace

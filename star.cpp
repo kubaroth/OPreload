@@ -11,6 +11,7 @@
 #include <UT/UT_Interrupt.h>
 #include <SYS/SYS_Math.h>
 #include <limits.h>
+#include <OP/OP_Director.h>
 
 using namespace HDK_Sample;
 using std::cout;
@@ -50,14 +51,13 @@ newSopOperator(OP_OperatorTable *table)
     std::cout << "Addding new operator: " << "HDK star" << std::endl;
     table->addOperator(op);
 
+    // std::cout << op->getOperatorShortHelpString() << std::endl;
+
     g_table = table;
     std::cout << "g_table " << g_table << std::endl;
 }
 
 static PRM_Name     negativeName("nradius", "Negative Radius");
-//                   ^^^^^^^^    ^^^^^^^^^^^^^^^
-//                   internal    descriptive version
-
 static PRM_Default  fiveDefault(5);     // Default to 5 divisions
 static PRM_Default  radiiDefaults[] = {
     PRM_Default(1),      // Outside radius
@@ -123,14 +123,31 @@ SOP_DualStar::cookMySop(OP_Context &context)
     using std::cout;
     using std::endl;
 
+    
     cout << "g_table cook " << g_table <<endl;
+
     
     OP_OperatorTable * table = getOperatorTable();
-    cout << table <<endl;
-    cout << "qqq222  "<< this->getInternalOperator()<<endl;
+    cout << "table from getOperatorTable(): " << table <<endl;
+    cout << "getInternalOperator(): "<< this->getInternalOperator()<<endl;
     // const char * aaa = getOpTypeFromTable(table);
     // Pass relevant data to plugin
     // This needs extra bookkiping (wrap into struct) if more inputs are used etc;
+
+
+    OP_Director * dir = OPgetDirector();
+
+    OP_OperatorTable * table2;
+    OP_Operator * op;
+    UT_String net = this->getNetName();
+    UT_String s = "/obj/geo1/";
+    s.append(net);
+    dir->getTableAndOperator(s, table2, op);
+    cout << "table thru director: " << table2 << " " << op << endl;
+    if (op)
+        cout << "op name:" << op->getName() << endl;
+
+    
     Data data;
 
     data.gdp = (void*)gdp;
