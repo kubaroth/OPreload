@@ -30,10 +30,37 @@ using std::endl;
 
 
 static OP_OperatorTable *g_table;
+static OP_Operator *g_op;
 
 OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
 
     std::cout << "AAAAA callback" << std::endl;
+    OP_Director * dir = OPgetDirector();
+    std::cout << g_table << std::endl;
+    std::cout << dir << std::endl;
+
+    // g_table->removeOperator(g_op);  // once remove we need to add it here...
+
+    g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload.so");  // this method is obsolete? and does not work 
+    g_table->requestReload();
+
+    // OP_Operator * op = new OP_Operator(
+    //                        "hdk_dualstar",                 // Internal name
+    //                        "Dual Star",                     // UI name
+    //                        SOP_DualStar::myConstructor,    // How to build the SOP
+    //                        SOP_DualStar::myTemplateList,   // My parameters
+    //                        1,                          // Min # of sources
+    //                        1,                          // Max # of sources
+    //                        0,      // Local variables
+    //                        OP_FLAG_GENERATOR,        // Flag it as generator
+    //                        0,  // labels
+    //                        2);    // Outputs.
+
+    // std::cout << "Addding new operator: " << "HDK star" << std::endl;
+    // g_table->addOperator(op);
+    // g_op = op;
+
+    
     return UT_ERROR_NONE;
 }
 
@@ -59,11 +86,11 @@ newSopOperator(OP_OperatorTable *table)
 
     std::cout << "Addding new operator: " << "HDK star" << std::endl;
     table->addOperator(op);
+    g_op = op;
 
     OP_Director * dir = OPgetDirector();
     auto lambda = [](){
-        std::cout << "This is my callback" << std::endl;
-
+        std::cout << "This is my callback" << std::endl;      
     };
     // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
     const char * abc =  "abc";
@@ -121,10 +148,6 @@ SOP_DualStar::~SOP_DualStar() {
 OP_ERROR
 SOP_DualStar::cookMySop(OP_Context &context)
 {
-    // g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload.so");  // this method is obsolete? and does not work 
-    // g_table->requestReload();
-    
-    // std::cout << "ASASA----------" <<std::endl;
     
     
     // We must lock our inputs before we try to access their geometry.
@@ -140,7 +163,7 @@ SOP_DualStar::cookMySop(OP_Context &context)
     using std::endl;
 
     
-    cout << "g_table cook " << g_table <<endl;
+    cout << "g_table cook---- " << g_table <<endl;
 
     
     OP_OperatorTable * table = getOperatorTable();
