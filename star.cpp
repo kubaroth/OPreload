@@ -13,6 +13,9 @@
 #include <limits.h>
 #include <OP/OP_Director.h>
 
+
+#include <UT/UT_Error.h>
+
 using namespace HDK_Sample;
 using std::cout;
 using std::endl;
@@ -27,6 +30,12 @@ using std::endl;
 
 
 static OP_OperatorTable *g_table;
+
+OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
+
+    std::cout << "AAAAA callback" << std::endl;
+    return UT_ERROR_NONE;
+}
 
 ///
 /// newSopOperator is the hook that Houdini grabs from this dll
@@ -51,8 +60,15 @@ newSopOperator(OP_OperatorTable *table)
     std::cout << "Addding new operator: " << "HDK star" << std::endl;
     table->addOperator(op);
 
-    // std::cout << op->getOperatorShortHelpString() << std::endl;
+    OP_Director * dir = OPgetDirector();
+    auto lambda = [](){
+        std::cout << "This is my callback" << std::endl;
 
+    };
+    // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
+    const char * abc =  "abc";
+    dir->setSaveCallback(aaa, (void*)abc);
+    
     g_table = table;
     std::cout << "g_table " << g_table << std::endl;
 }
