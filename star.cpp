@@ -13,76 +13,15 @@
 #include <limits.h>
 #include <OP/OP_Director.h>
 
-#include <boost/filesystem.hpp>
 #include <UT/UT_Error.h>
+
+#include "reloader.hpp"
 
 using std::cout;
 using std::endl;
 
-#define CR_HOST CR_UNSAFE
-#include "cr.h"
-
-const char *plugin = PLUGIN_DIR "/" CR_PLUGIN("guest_plugin");
-
-struct Data{
-    void * director;
-    void * op;
-};
 
 class SOP_DualStar;
-
-//
-// Help is stored in a "wiki" style text file.  This text file should be copied
-// to $HOUDINI_PATH/help/nodes/sop/star.txt
-//
-// See the sample_install.sh file for an example.
-//
-
-
- static OP_OperatorTable *g_table = NULL;
-static OP_Operator *g_op;
-static cr_plugin g_ctx;  //hotreload
-
-
-OP_ERROR aaa(std::basic_ostream<char>& a, void* b){
-
-    std::cout << "AAAAA callback" << std::endl;
-    OP_Director * dir = OPgetDirector();
-    std::cout << g_table << std::endl;
-    std::cout << dir << std::endl;
-
-    // const UT_StringRef& name = g_op->getName();
-    // cout << "g_op name: " << name.c_str() <<endl;
-    // g_table->setOpRename(name.c_str(), "hdk_dualstar1", &std::cout);
-    
-    g_table->removeOperator(g_op);  // once remove we need to add it here...
-
-    // g_table->loadDSO("/home/kuba/houdini18.0/dso/libhoudini_reload1.so");  // this method is obsolete? and does not work
-    g_table->requestReload();
-    g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload.so");
-    g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload1.so");
-    g_table->loadDSO("/home/kuba/PRJ/houdini_reload/__build/libhoudini_reload2.so");
-
-
-    namespace fs = boost::filesystem;
-    fs::path someDir("/home/kuba/PRJ/houdini_reload/__build/");
-    // fs::directory_iterator end_iter;
-
-    // typedef std::multimap<std::time_t, fs::path> result_set_t;
-    // result_set_t result_set;
-
-    // if ( fs::exists(someDir) && fs::is_directory(someDir)){
-    //     for( fs::directory_iterator dir_iter(someDir) ; dir_iter != end_iter ; ++dir_iter) {
-    //         if (fs::is_regular_file(dir_iter->status()) ){
-    //             result_set.insert(result_set_t::value_type(fs::last_write_time(dir_iter->path()), *dir_iter));
-    //         }
-    //     }
-    // }
-    
-
-    
-    return UT_ERROR_NONE;
-}
 
 ///
 /// newSopOperator is the hook that Houdini grabs from this dll
@@ -116,14 +55,14 @@ newSopOperator(OP_OperatorTable *table)
 
     OP_Director * dir = OPgetDirector();
     const char * abc =  "abc";    
-    dir->setSaveCallback(aaa, (void*)abc);
+    dir->setSaveCallback(reload_callback, (void*)abc);
 
     g_table = table;
         
 }
 
 static PRM_Name     negativeName("nradius", "Negative Radius");
-static PRM_Default  fiveDefault(5);     // Default to 5 divisions
+static PRM_Default  fiveDefault(6);     // Default to 5 divisions
 static PRM_Default  radiiDefaults[] = {
     PRM_Default(1),      // Outside radius
     PRM_Default(0.3)     // Inside radius
@@ -183,8 +122,8 @@ SOP_DualStar::cookMySop(OP_Context &context)
     using std::endl;
 
     
+    // cout << "---------g_table cook " << g_table <<endl;
     cout << "g_table cook " << g_table <<endl;
-    // cout << "+++++++g_table cook " << g_table <<endl;
 
     
     OP_OperatorTable * table = getOperatorTable();

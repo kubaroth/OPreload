@@ -12,3 +12,7 @@ make install
 
 ** NOTES:
 Houdini OP_OperatorTable - does not handle reloading .so files. Once path is loaded there is not easy way (that I know of) to dealocate it. A dumb workaround is to on every build increase the dso file name and tell Houdini to load the latest .so (which contains same symbols). This should do the trick to update operator in the current session.
+** TODO:
+- extract base_name of the file (without Boost)
+- handle multiple coping of dso during reload (not a big issue - other then too many files get created)
+- replace hardcoded path to the build directory with the CMake flag   

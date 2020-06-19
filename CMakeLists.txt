@@ -34,8 +34,6 @@ add_definitions(
        -D_FILE_OFFSET_BITS=64
        -DGCC4
        -DGCC3
-       -DBOOST_SYSTEM_NO_DEPRECATED # https://stackoverflow.com/a/30877725
-       -DBOOST_NO_CXX11_SCOPED_ENUMS=1 # https://stackoverflow.com/a/35007213
        )
 
 set(HOUDINI_LIBRARIES
@@ -51,7 +49,6 @@ set(HOUDINI_LIBRARIES
        HoudiniPRM
        HoudiniRAY
        hboost_system
-       hboost_filesystem
        tbb
        
        # GLU 
@@ -78,23 +75,3 @@ target_link_directories(${PROJECT_NAME} BEFORE PUBLIC ${HFS}/dsolib)
 target_link_libraries(${PROJECT_NAME} ${HOUDINI_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION dso)
-
-
-### Guest
-set (PLUGIN guest_plugin)
-
-add_library(${PLUGIN} SHARED
-  guest_plugin.cpp
-  )
-
-target_include_directories(${PLUGIN} BEFORE PUBLIC
-  ${HFS}/toolkit/include/
-  )
-
-target_link_directories(${PLUGIN} BEFORE PUBLIC ${HFS}/dsolib)
-
-target_link_libraries(${PLUGIN} ${HOUDINI_LIBRARIES})
-
-# Currenlty not used as the plugin is hardcoded to build path
-#install(TARGETS ${PLUGIN} DESTINATION dso)
-
