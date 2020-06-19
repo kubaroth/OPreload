@@ -22,6 +22,7 @@ using std::endl;
 
 
 class SOP_DualStar;
+extern OP_OperatorTable *g_table;
 
 ///
 /// newSopOperator is the hook that Houdini grabs from this dll
@@ -53,11 +54,21 @@ newSopOperator(OP_OperatorTable *table)
     };
     // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
 
-    OP_Director * dir = OPgetDirector();
-    const char * abc =  "abc";    
-    dir->setSaveCallback(reload_callback, (void*)abc);
+    // Add only one callback - need control this based on the external state (# of dsos)
+    // as we keep loading a new *.so file on each save.
+    std::string directory = PLUGIN_DIR;
+    auto list = glob(directory + '/' + "*.so");
+    int total_files = list.size();
 
-    g_table = table;
+    if (total_files == 1){
+        OP_Director * dir = OPgetDirector();
+        const char * abc =  "abc";
+        cout << "setting callback " << endl;
+        dir->setSaveCallback(reload_callback, (void*)abc);
+
+        g_table = table;
+
+    }
         
 }
 
@@ -121,18 +132,12 @@ SOP_DualStar::cookMySop(OP_Context &context)
     using std::cout;
     using std::endl;
 
-    
-    // cout << "---------g_table cook " << g_table <<endl;
-    cout << "g_table cook " << g_table <<endl;
+    cout << "-------g_table cook " << g_table <<endl;
 
     
     OP_OperatorTable * table = getOperatorTable();
     cout << "table from getOperatorTable(): " << table <<endl;
     cout << "getInternalOperator(): "<< this->getInternalOperator()<<endl;
-    // const char * aaa = getOpTypeFromTable(table);
-    // Pass relevant data to plugin
-    // This needs extra bookkiping (wrap into struct) if more inputs are used etc;
-
 
     OP_Director * dir = OPgetDirector();
 

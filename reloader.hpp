@@ -12,8 +12,8 @@
 
 
 
-static OP_OperatorTable *g_table = NULL;
-static OP_Operator *g_op;
+OP_OperatorTable *g_table = NULL;
+OP_Operator *g_op;
 
 
 //https://stackoverflow.com/questions/8401777/simple-glob-in-c-on-unix-system
@@ -52,7 +52,7 @@ OP_ERROR reload_callback(std::basic_ostream<char>& a, void* b){
     using std::endl;
 
     // Increment dso file - copy the original
-    std::string directory = "/home/kuba/PRJ/houdini_reload/__build";
+    std::string directory = PLUGIN_DIR;
     std::string base_name = "libhoudini_reload"; // TODO replace with regex
     
     auto list = glob(directory + '/' + "*.so");
