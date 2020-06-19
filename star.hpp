@@ -19,7 +19,7 @@ class SOP_DualStar : public SOP_Node
 
         /// cookMySop does the actual work of the SOP computing, in this
         /// case, a star shape.
-        virtual OP_ERROR         cookMySop(OP_Context &context);
+        virtual OP_ERROR             cookMySop(OP_Context &context);
         virtual GU_DetailHandle      cookMySopOutput(OP_Context &context, int outputidx, SOP_Node *interest);
 
         /// Actually build a star in the given geometry
@@ -29,13 +29,13 @@ class SOP_DualStar : public SOP_Node
     private:
         /// The following list of accessors simplify evaluating the parameters
         /// of the SOP.
-        int         DIVISIONS(fpreal t)     { return evalInt  ("divs", 0, t); }
+        int     DIVISIONS(fpreal t)     { return evalInt  ("divs", 0, t); }
         fpreal  XRADIUS(fpreal t)   { return evalFloat("rad", 0, t); }
         fpreal  YRADIUS(fpreal t)   { return evalFloat("rad", 1, t); }
-        int         NEGRADIUS()         { return evalInt  ("nradius", 0, 0); }
+        int     NEGRADIUS()         { return evalInt  ("nradius", 0, 0); }
         fpreal  CENTERX(fpreal t)   { return evalFloat("t", 0, t); }
         fpreal  CENTERY(fpreal t)   { return evalFloat("t", 1, t); }
         fpreal  CENTERZ(fpreal t)   { return evalFloat("t", 2, t); }
-        int         ORIENT()        { return evalInt  ("orient", 0, 0); }
+        int     ORIENT()        { return evalInt  ("orient", 0, 0); }
 
 };

@@ -11,6 +11,8 @@ make install
 #+END_SRC
 
 ** NOTES:
-Houdini OP_OperatorTable - does not handle reloading .so files. Once path is loaded there is not easy way (that I know of) to dealocate it. A dumb workaround is to on every build increase the dso file name and tell Houdini to load the latest .so (which contains same symbols). This should do the trick to update operator in the current session.
+Houdini OP_OperatorTable - does not handle reloading same dso files. Once path is loaded there is no easy way (that I know of) to dealocate it. A dumb workaround is to on every build increase the dso file name and tell Houdini to load the latest .so (containing same symbols) and override existing operator (OP_Operator). This should do the 'reload' trick and update operator in the current session with the recent changes.
+IMPORTANT: Between every Houdini restart - make sure to remove all generated temporary dsos (*.so) in the build directory. This is necessary to register the dso reload callback only once. 
 ** TODO:
+- move all the globals into VersionCounter singleton
 - extract base_name of the file (without Boost)

@@ -21,9 +21,6 @@ using std::cout;
 using std::endl;
 
 
-class SOP_DualStar;
-extern OP_OperatorTable *g_table;
-
 ///
 /// newSopOperator is the hook that Houdini grabs from this dll
 /// and invokes to register the SOP.  In this case we add ourselves
@@ -32,7 +29,7 @@ extern OP_OperatorTable *g_table;
 void
 newSopOperator(OP_OperatorTable *table)
 {
-
+    
     OP_Operator * op = new OP_Operator(
         "hdk_dualstar",                 // Internal name
         "Dual Star",                     // UI name
@@ -44,31 +41,24 @@ newSopOperator(OP_OperatorTable *table)
         OP_FLAG_GENERATOR,        // Flag it as generator
         0,  // labels
         2);    // Outputs.
-
+   
     std::cout << "Addding new operator: " << "HDK star" << std::endl;
     table->addOperator(op);
     g_op = op;
 
-    auto lambda = [](){
-        std::cout << "This is my callback" << std::endl;      
-    };
-    // int(decltype(lambda)::*ptr)()const = &decltype(lambda)::operator();
-
-    // Add only one callback - need control this based on the external state (# of dsos)
-    // as we keep loading a new *.so file on each save.
-    std::string directory = PLUGIN_DIR;
-    auto list = glob(directory + '/' + "*.so");
-    int total_files = list.size();
-
-    if (total_files == 1){
+    VersionCounter& counter = VersionCounter::getInstance();
+    cout << " dso ver:" << counter.dso_version << endl;
+    
+    if (counter.dso_version == 0){
         OP_Director * dir = OPgetDirector();
         const char * abc =  "abc";
         cout << "setting callback " << endl;
         dir->setSaveCallback(reload_callback, (void*)abc);
 
         g_table = table;
-
     }
+
+    counter.dso_version++;
         
 }
 
@@ -132,30 +122,9 @@ SOP_DualStar::cookMySop(OP_Context &context)
     using std::cout;
     using std::endl;
 
-    cout << "-------g_table cook " << g_table <<endl;
+    cout << "Update: @@@@@g_table cook " << g_table <<endl;
 
-    
-    OP_OperatorTable * table = getOperatorTable();
-    cout << "table from getOperatorTable(): " << table <<endl;
-    cout << "getInternalOperator(): "<< this->getInternalOperator()<<endl;
-
-    OP_Director * dir = OPgetDirector();
-
-    OP_OperatorTable * table2;
-    OP_Operator * op;
-    UT_String net = this->getNetName();
-    UT_String s = "/obj/geo1/";
-    s.append(net);
-    dir->getTableAndOperator(s, table2, op);
-    cout << "table thru director: " << table2 << " " << op << endl;
-    if (op)
-        cout << "op name:" << op->getName() << endl;
-
-    auto parent = getParent();
-    const UT_StringHolder& type_name = parent->getOperator()->getName();
-    cout << "___" << type_name <<endl;
-
-    
+        
     // Start the interrupt server
     buildStar(gdp, context);
 

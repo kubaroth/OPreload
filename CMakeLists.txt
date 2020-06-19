@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13.0)
 
 project(houdini_reload)
 
+
 set(HOUDINI_VERSION_MAJOR 18)
 set(HOUDINI_VERSION_MINOR 0)
 set(HOUDINI_VERSION_PATCH 416)
@@ -65,6 +66,8 @@ set(CMAKE_CXX_FLAGS "-fopenmp")
 add_library(${PROJECT_NAME} SHARED
   star.cpp
   )
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 
 target_include_directories(${PROJECT_NAME} BEFORE PUBLIC
   ${HFS}/toolkit/include/
