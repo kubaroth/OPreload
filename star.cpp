@@ -63,7 +63,7 @@ newSopOperator(OP_OperatorTable *table)
 }
 
 static PRM_Name     negativeName("nradius", "Negative Radius");
-static PRM_Default  fiveDefault(5);     // Default to 5 divisions
+static PRM_Default  fiveDefault(6);     // Default to 5 divisions
 static PRM_Default  radiiDefaults[] = {
     PRM_Default(1),      // Outside radius
     PRM_Default(0.3)     // Inside radius
@@ -124,6 +124,11 @@ SOP_DualStar::cookMySop(OP_Context &context)
 
     cout << "Update: @@@@@g_table cook " << g_table <<endl;
 
+    // GA_RWHandleV3 n_h(gdp, GA_ATTRIB_POINT, "N");
+    // if (!n_h.isValid()){
+    //     n_h = GA_RWHandleV3(gdp->addFloatTuple(GA_ATTRIB_POINT,  GEO_STD_ATTRIB_NORMAL, 3));
+    // }
+     
         
     // Start the interrupt server
     buildStar(gdp, context);
