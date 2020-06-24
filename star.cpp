@@ -32,15 +32,15 @@ newSopOperator(OP_OperatorTable *table)
     
     OP_Operator * op = new OP_Operator(
         "hdk_dualstar",                 // Internal name
-        "Dual Star",                     // UI name
+        "Dual Star",                    // UI name
         SOP_DualStar::myConstructor,    // How to build the SOP
         SOP_DualStar::myTemplateList,   // My parameters
         1,                          // Min # of sources
         1,                          // Max # of sources
-        0,      // Local variables
-        OP_FLAG_GENERATOR,        // Flag it as generator
-        0,  // labels
-        2);    // Outputs.
+        0,                          // Local variables
+        OP_FLAG_GENERATOR,          // Flag it as generator
+        0,                          // labels
+        2);                         // Outputs.
    
     std::cout << "Addding new operator: " << "HDK star" << std::endl;
     table->addOperator(op);
@@ -63,7 +63,7 @@ newSopOperator(OP_OperatorTable *table)
 }
 
 static PRM_Name     negativeName("nradius", "Negative Radius");
-static PRM_Default  fiveDefault(6);     // Default to 5 divisions
+static PRM_Default  fiveDefault(5);     // Default to 5 divisions
 static PRM_Default  radiiDefaults[] = {
     PRM_Default(1),      // Outside radius
     PRM_Default(0.3)     // Inside radius
@@ -71,19 +71,19 @@ static PRM_Default  radiiDefaults[] = {
 
 PRM_Template
 SOP_DualStar::myTemplateList[] = {
-    PRM_Template(PRM_INT,           // Integer parameter.
+    PRM_Template(PRM_INT,                       // Integer parameter.
                  PRM_Template::PRM_EXPORT_TBX,  // Export to top of viewer
-                 // when user selects this node
-                 1,         // One integer in this row/parameter
-                 &PRMdivName,   // Name of this parameter - must be static
-                 &fiveDefault,  // Default for this parameter - ditto
-                 0,     // Menu for this parameter
-                 &PRMdivision2Range // Valid range
+                                                // when user selects this node
+                 1,                  // One integer in this row/parameter
+                 &PRMdivName,        // Name of this parameter - must be static
+                 &fiveDefault,       // Default for this parameter - ditto
+                 0,                  // Menu for this parameter
+                 &PRMdivision2Range  // Valid range
         ),
-    PRM_Template(PRM_XYZ,   2, &PRMradiusName, radiiDefaults),
-    PRM_Template(PRM_TOGGLE,    1, &negativeName),
-    PRM_Template(PRM_XYZ,       3, &PRMcenterName),
-    PRM_Template(PRM_ORD,   1, &PRMorientName, 0, &PRMplaneMenu),
+    PRM_Template(PRM_XYZ,    2, &PRMradiusName, radiiDefaults),
+    PRM_Template(PRM_TOGGLE, 1, &negativeName),
+    PRM_Template(PRM_XYZ,    3, &PRMcenterName),
+    PRM_Template(PRM_ORD,    1, &PRMorientName, 0, &PRMplaneMenu),
     PRM_Template()
 };
 
