@@ -21,53 +21,13 @@ using std::cout;
 using std::endl;
 
 
-///
-/// newSopOperator is the hook that Houdini grabs from this dll
-/// and invokes to register the SOP.  In this case we add ourselves
-/// to the specified operator table.
-///
-void
-newSopOperator(OP_OperatorTable *table)
-{
-    
-    OP_Operator * op = new OP_Operator(
-        "hdk_dualstar",                 // Internal name
-        "Dual Star",                    // UI name
-        SOP_DualStar::myConstructor,    // How to build the SOP
-        SOP_DualStar::myTemplateList,   // My parameters
-        1,                          // Min # of sources
-        1,                          // Max # of sources
-        0,                          // Local variables
-        OP_FLAG_GENERATOR,          // Flag it as generator
-        0,                          // labels
-        2);                         // Outputs.
-   
-    std::cout << "Addding new operator: " << "HDK star" << std::endl;
-    table->addOperator(op);
-    g_op = op;
-
-    VersionCounter& counter = VersionCounter::getInstance();
-    cout << " dso ver:" << counter.dso_version << endl;
-    
-    if (counter.dso_version == 0){
-        OP_Director * dir = OPgetDirector();
-        const char * abc =  "abc";
-        cout << "setting callback " << endl;
-        dir->setSaveCallback(reload_callback, (void*)abc);
-
-        g_table = table;
-    }
-
-    counter.dso_version++;
-        
-}
-
-static PRM_Name     negativeName("nradius", "Negative Radius");
-static PRM_Default  fiveDefault(6);     // Default to 5 divisions
-static PRM_Default  radiiDefaults[] = {
+PRM_Name     negativeName("nradius", "Negative Radius");
+PRM_Default  fiveDefault(6);     // Default to 5 divisions
+PRM_Default  radiiDefaults[] = {
     PRM_Default(1),      // Outside radius
     PRM_Default(0.3)     // Inside radius
 };
+
 
 PRM_Template
 SOP_DualStar::myTemplateList[] = {
@@ -86,6 +46,7 @@ SOP_DualStar::myTemplateList[] = {
     PRM_Template(PRM_ORD,    1, &PRMorientName, 0, &PRMplaneMenu),
     PRM_Template()
 };
+
 
 
 OP_Node *
@@ -227,3 +188,46 @@ SOP_DualStar::cookMySopOutput(OP_Context &context, int outputidx, SOP_Node *inte
 
     return result;
 }
+
+
+///
+/// newSopOperator is the hook that Houdini grabs from this dll
+/// and invokes to register the SOP.  In this case we add ourselves
+/// to the specified operator table.
+///
+void
+newSopOperator(OP_OperatorTable *table)
+{
+    
+    OP_Operator * op = new OP_Operator(
+        "hdk_dualstar",                 // Internal name
+        "Dual Star",                    // UI name
+        SOP_DualStar::myConstructor,    // How to build the SOP
+        SOP_DualStar::myTemplateList,   // My parameters
+        1,                          // Min # of sources
+        1,                          // Max # of sources
+        0,                          // Local variables
+        OP_FLAG_GENERATOR,          // Flag it as generator
+        0,                          // labels
+        2);                         // Outputs.
+   
+    std::cout << "Addding new operator: " << "HDK star" << std::endl;
+    table->addOperator(op);
+    g_op = op;
+
+    VersionCounter& counter = VersionCounter::getInstance();
+    cout << " dso ver:" << counter.dso_version << endl;
+    
+    if (counter.dso_version == 0){
+        OP_Director * dir = OPgetDirector();
+        const char * abc =  "abc";
+        cout << "setting callback " << endl;
+        dir->setSaveCallback(reload_callback, (void*)abc);
+
+        g_table = table;
+    }
+
+    counter.dso_version++;
+        
+}
+
