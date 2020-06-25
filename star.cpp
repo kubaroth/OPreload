@@ -47,7 +47,7 @@ SOP_DualStar::myTemplateList[] = {
     PRM_Template()
 };
 
-
+Parms SOP_DualStar::parms;
 
 OP_Node *
 SOP_DualStar::myConstructor(OP_Network *net, const char *name, OP_Operator *op)
