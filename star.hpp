@@ -1,5 +1,38 @@
 #pragma once
 #include <SOP/SOP_Node.h>
+#include <vector>
+
+struct Parms{
+    PRM_Template * myTemplateList;
+    Parms (){
+        PRM_Name     negativeName("nradius", "Negative Radius");
+        PRM_Default  fiveDefault(6);     // Default to 5 divisions
+        PRM_Default  radiiDefaults[] = {
+            PRM_Default(1),      // Outside radius
+            PRM_Default(0.3)     // Inside radius
+        };
+
+        std::vector<PRM_Template> aaa ={
+            PRM_Template(PRM_INT,                       // Integer parameter.
+                         PRM_Template::PRM_EXPORT_TBX,  // Export to top of viewer
+                         // when user selects this node
+                         1,                  // One integer in this row/parameter
+                         &PRMdivName,        // Name of this parameter - must be static
+                         &fiveDefault,       // Default for this parameter - ditto
+                         0,                  // Menu for this parameter
+                         &PRMdivision2Range  // Valid range
+                ),
+            PRM_Template(PRM_XYZ,    2, &PRMradiusName, radiiDefaults),
+            PRM_Template(PRM_TOGGLE, 1, &negativeName),
+            PRM_Template(PRM_XYZ,    3, &PRMcenterName),
+            PRM_Template(PRM_ORD,    1, &PRMorientName, 0, &PRMplaneMenu),
+            PRM_Template()
+        };
+
+        myTemplateList = aaa.data();
+    }
+
+};
 
 
 class SOP_DualStar : public SOP_Node
@@ -11,6 +44,7 @@ class SOP_DualStar : public SOP_Node
         /// Stores the description of the interface of the SOP in Houdini.
         /// Each parm template refers to a parameter.
         static PRM_Template          myTemplateList[];
+        static Parms          parms;
 
     protected:
         SOP_DualStar(OP_Network *net, const char *name, OP_Operator *op);

@@ -203,7 +203,8 @@ newSopOperator(OP_OperatorTable *table)
         "hdk_dualstar",                 // Internal name
         "Dual Star",                    // UI name
         SOP_DualStar::myConstructor,    // How to build the SOP
-        SOP_DualStar::myTemplateList,   // My parameters
+/*         SOP_DualStar::myTemplateList,   // My parameters  */
+SOP_DualStar::parms.myTemplateList,
         1,                          // Min # of sources
         1,                          // Max # of sources
         0,                          // Local variables
