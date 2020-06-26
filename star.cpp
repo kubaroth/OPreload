@@ -168,10 +168,13 @@ SOP_DualStar::cookMySopOutput(OP_Context &context, int outputidx, SOP_Node *inte
 void
 newSopOperator(OP_OperatorTable *table)
 {
-    /// NOTE: we are leaking here as we need to construct and  allocate
-    /// all parameter in order to pass the pointer to OP_Operator
+    /// NOTE: Currently we are leaking here as we need to construct and  allocate
+    /// all parameters in order to pass the pointer to OP_Operator
+    /// Would be desirable to use unique_ptr instead but that requires changes
+    /// in the PRM_Template signature
+
     auto negativeName = new PRM_Name ("nradius", "Negative Radius");
-    auto anothername2 = new PRM_Name ("nradius2", "nname2");
+    auto negativeName2 = new PRM_Name ("nradius2", "Label changed");
     auto fiveDefault = new PRM_Default(5);
     PRM_Default  * anotherDefaults = new PRM_Default[2]
     {
