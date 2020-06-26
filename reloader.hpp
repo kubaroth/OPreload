@@ -103,8 +103,6 @@ OP_ERROR reload_callback(std::basic_ostream<char>& a, void* b){
     auto list = glob(directory + '/' + "*.so");
     int total_files = list.size();
 
-    cout << "built file: " << list[0] << endl; // first one in the list
-
     // TODO:
     // /// Extract base name
     // std::smatch m;
@@ -127,17 +125,20 @@ OP_ERROR reload_callback(std::basic_ostream<char>& a, void* b){
     ss << std::setfill('0') << std::setw(5) << std::to_string(total_files + 1);
 
     std::string dest = directory + '/' + base_name + ss.str() + ".so";
-    cout << "copy to: " << dest <<endl;
-
-    // Copy
-    UT_FileUtil::copyFile(list[0].c_str(), dest.c_str());
 
     // Update plugin
-    g_table->removeOperator(g_op);
-    g_table->requestReload();
-    
-    cout << "loading dso: "<< dest <<endl;;
-    g_table->loadDSO(dest.c_str());
-        
+
+    if (total_files > 0){
+        cout << "built file: " << list[0] << endl; // first one in the list
+
+        // Copy dso just built
+        cout << "copy to: " << dest <<endl;
+        UT_FileUtil::copyFile(list[0].c_str(), dest.c_str());
+
+        cout << "loading dso: "<< dest <<endl;;
+        g_table->removeOperator(g_op);
+        g_table->requestReload();
+        g_table->loadDSO(dest.c_str());
+    }
     return UT_ERROR_NONE;
 }
