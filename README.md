@@ -27,7 +27,3 @@ make install
  - This version introduces memory leaks to guarantee long enough lifetimes for newly added parameters
  
 There is a possible way to improve state of things by at the cost of increasing code bloat of current solution. This would require to increment the internal node type (hdk_dualstar) during each built (and change each time the type  during reload in Houdini session). 
-
-## TODO:
-- handle cleanup of generated intermediate dsos
-- extract base_name of the file (try to avoid Boost filesystem - missing symbols in shipped version of hboost)
