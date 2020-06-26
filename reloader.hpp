@@ -7,39 +7,15 @@
 #include <string>
 #include <sstream>
 
+#include <string>
 #include <regex>
 #include <iomanip>  // setw
+#include <stdio.h>  // remove file
 
 #include <UT/UT_FileUtil.h>  // copy file
 
 OP_OperatorTable *g_table;
 OP_Operator *g_op;
-
-// https://stackoverflow.com/questions/1008019/c-singleton-design-pattern
-class VersionCounter
-{
-public:
-    static VersionCounter& getInstance() {
-        static VersionCounter    instance; // Guaranteed to be destroyed.
-                                           // Instantiated on first use.
-        return instance;
-    }
-
-private:
-    VersionCounter() {}
-
-public:
-    VersionCounter(VersionCounter const&)  = delete;
-    void operator=(VersionCounter const&)  = delete;
-    // Note: Scott Meyers mentions in his Effective Modern
-    //       C++ book, that deleted functions should generally
-    //       be public as it results in better error messages
-    //       due to the compilers behavior to check accessibility
-    //       before deleted status
-
-    int dso_version = 0;
-};
-
 
 //https://stackoverflow.com/questions/8401777/simple-glob-in-c-on-unix-system
 std::vector<std::string> glob(const std::string& pattern) {
@@ -51,8 +27,14 @@ std::vector<std::string> glob(const std::string& pattern) {
 
     // do the glob operation
     int return_value = glob(pattern.c_str(), GLOB_TILDE, NULL, &glob_result);
+
     if(return_value != 0) {
         globfree(&glob_result);
+
+        if(return_value == GLOB_NOMATCH) {
+            return std::vector<std::string>();
+        }
+
         stringstream ss;
         ss << "glob() failed with return_value " << return_value << endl;
         throw std::runtime_error(ss.str());
@@ -70,6 +52,44 @@ std::vector<std::string> glob(const std::string& pattern) {
     // done
     return filenames;
 }
+
+// https://stackoverflow.com/questions/1008019/c-singleton-design-pattern
+class VersionCounter
+{
+public:
+    static VersionCounter& getInstance() {
+        static VersionCounter    instance; // Guaranteed to be destroyed.
+                                           // Instantiated on first use.
+        return instance;
+    }
+
+private:
+    VersionCounter() {}
+    ~VersionCounter() {
+        std::string directory = PLUGIN_DIR;
+        auto list = glob(directory + '/' + "*.so");
+        int total_files = list.size();
+
+        if (total_files > 0){
+            std::cout << "Deleting *.so files from: " << directory << std::endl;
+            for (auto &path : list){
+                remove(path.c_str());
+            }
+        }
+
+    }
+
+public:
+    VersionCounter(VersionCounter const&)  = delete;
+    void operator=(VersionCounter const&)  = delete;
+    // Note: Scott Meyers mentions in his Effective Modern
+    //       C++ book, that deleted functions should generally
+    //       be public as it results in better error messages
+    //       due to the compilers behavior to check accessibility
+    //       before deleted status
+
+    int dso_version = 0;
+};
 
 OP_ERROR reload_callback(std::basic_ostream<char>& a, void* b){
 
