@@ -198,13 +198,30 @@ SOP_DualStar::cookMySopOutput(OP_Context &context, int outputidx, SOP_Node *inte
 void
 newSopOperator(OP_OperatorTable *table)
 {
+
+    PRM_Name     * negativeName = new PRM_Name ("nradius", "Negative Radius");
+    PRM_Name     * negativeName2 = new PRM_Name ("nradius2", "Negative Radius2");
+    // PRM_Default  fiveDefault(6);     // Default to 5 divisions
+    PRM_Default  radiiDefaults[] = {
+        PRM_Default(1),      // Outside radius
+        PRM_Default(0.3)     // Inside radius
+    };
+
+    std::vector<PRM_Template> * vvv = new std::vector<PRM_Template>();
+    auto p1 = PRM_Template(PRM_TOGGLE, 1, negativeName);
+    auto p2 = PRM_Template(PRM_TOGGLE, 1, negativeName2);
+    auto pend = PRM_Template();
+    vvv->push_back(p1);
+    vvv->push_back(p2);
+    vvv->push_back(pend);
     
     OP_Operator * op = new OP_Operator(
         "hdk_dualstar",                 // Internal name
         "Dual Star",                    // UI name
         SOP_DualStar::myConstructor,    // How to build the SOP
-/*         SOP_DualStar::myTemplateList,   // My parameters  */
-SOP_DualStar::parms.myTemplateList,
+        /* SOP_DualStar::myTemplateList,   */
+/*SOP_DualStar::parms.myTemplateList,*/
+        vvv->data(),
         1,                          // Min # of sources
         1,                          // Max # of sources
         0,                          // Local variables
