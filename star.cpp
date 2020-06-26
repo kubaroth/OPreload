@@ -208,16 +208,20 @@ newSopOperator(OP_OperatorTable *table)
         PRM_Default(0.3)     // Inside radius
     };
 
-    std::vector<PRM_Template> * vvv = new std::vector<PRM_Template>();
+
     auto _p1 = PRM_Template(PRM_TOGGLE, 1, &negativeName);
     auto _p2 = PRM_Template(PRM_TOGGLE, 1, &negativeName2);
     auto p1 = PRM_Template(PRM_TOGGLE, 1, nname1);
     auto p2 = PRM_Template(PRM_TOGGLE, 1, nname2);
 
     auto pend = PRM_Template();
-    vvv->push_back(p1);
-    vvv->push_back(p2);
-    vvv->push_back(pend);
+
+    std::vector<PRM_Template> * vvv = new std::vector<PRM_Template>(
+    {
+            _p1,
+            _p2,
+            pend
+    });
     
     OP_Operator * op = new OP_Operator(
         "hdk_dualstar",                 // Internal name
