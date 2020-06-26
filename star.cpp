@@ -1,4 +1,4 @@
-#include "star.hpp"
+#include <vector>
 
 #include <GU/GU_Detail.h>
 #include <GEO/GEO_PrimPoly.h>
@@ -15,40 +15,11 @@
 
 #include <UT/UT_Error.h>
 
+#include "star.hpp"
 #include "reloader.hpp"
 
 using std::cout;
 using std::endl;
-
-
-static PRM_Name     negativeName("nradius", "Negative Radius");
-static PRM_Name     negativeName2("nradius2", "Negative Radius2");
-static PRM_Default  fiveDefault(6);     // Default to 5 divisions
-static PRM_Default  radiiDefaults[] = {
-    PRM_Default(1),      // Outside radius
-    PRM_Default(0.3)     // Inside radius
-};
-
-
-PRM_Template
-SOP_DualStar::myTemplateList[] = {
-    PRM_Template(PRM_INT,                       // Integer parameter.
-                 PRM_Template::PRM_EXPORT_TBX,  // Export to top of viewer
-                                                // when user selects this node
-                 1,                  // One integer in this row/parameter
-                 &PRMdivName,        // Name of this parameter - must be static
-                 &fiveDefault,       // Default for this parameter - ditto
-                 0,                  // Menu for this parameter
-                 &PRMdivision2Range  // Valid range
-        ),
-    PRM_Template(PRM_XYZ,    2, &PRMradiusName, radiiDefaults),
-    PRM_Template(PRM_TOGGLE, 1, &negativeName),
-    PRM_Template(PRM_XYZ,    3, &PRMcenterName),
-    PRM_Template(PRM_ORD,    1, &PRMorientName, 0, &PRMplaneMenu),
-    PRM_Template()
-};
-
-Parms SOP_DualStar::parms;
 
 OP_Node *
 SOP_DualStar::myConstructor(OP_Network *net, const char *name, OP_Operator *op)
@@ -70,8 +41,7 @@ SOP_DualStar::~SOP_DualStar() {
 OP_ERROR
 SOP_DualStar::cookMySop(OP_Context &context)
 {
-    
-    
+
     // We must lock our inputs before we try to access their geometry.
     // OP_AutoLockInputs will automatically unlock our inputs when we return.
     // NOTE: Don't call unlockInputs yourself when using this!
@@ -90,8 +60,7 @@ SOP_DualStar::cookMySop(OP_Context &context)
     // if (!n_h.isValid()){
     //     n_h = GA_RWHandleV3(gdp->addFloatTuple(GA_ATTRIB_POINT,  GEO_STD_ATTRIB_NORMAL, 3));
     // }
-     
-        
+
     // Start the interrupt server
     buildStar(gdp, context);
 
@@ -199,51 +168,55 @@ SOP_DualStar::cookMySopOutput(OP_Context &context, int outputidx, SOP_Node *inte
 void
 newSopOperator(OP_OperatorTable *table)
 {
-
-    PRM_Name     * nname1 = new PRM_Name ("nradius", "nname1");
-    PRM_Name     * nname2 = new PRM_Name ("nradius2", "nname2");
-    // PRM_Default  fiveDefault(6);     // Default to 5 divisions
-    PRM_Default  radiiDefaults[] = {
-        PRM_Default(1),      // Outside radius
-        PRM_Default(0.3)     // Inside radius
+    /// NOTE: we are leaking here as we need to construct and  allocate
+    /// all parameter in order to pass the pointer to OP_Operator
+    auto negativeName = new PRM_Name ("nradius", "Negative Radius");
+    auto anothername2 = new PRM_Name ("nradius2", "nname2");
+    auto fiveDefault = new PRM_Default(5);
+    PRM_Default  * anotherDefaults = new PRM_Default[2]
+    {
+        PRM_Default(2),      // Outside radius
+        PRM_Default(0.4)     // Inside radius
     };
 
-
-    auto _p1 = PRM_Template(PRM_TOGGLE, 1, &negativeName);
-    auto _p2 = PRM_Template(PRM_TOGGLE, 1, &negativeName2);
-    auto p1 = PRM_Template(PRM_TOGGLE, 1, nname1);
-    auto p2 = PRM_Template(PRM_TOGGLE, 1, nname2);
-
-    auto pend = PRM_Template();
-
-    std::vector<PRM_Template> * vvv = new std::vector<PRM_Template>(
+    std::vector<PRM_Template> * myTemplateList = new std::vector<PRM_Template>(
     {
-            _p1,
-            _p2,
-            pend
+        PRM_Template(PRM_INT,                       // Integer parameter.
+                     PRM_Template::PRM_EXPORT_TBX,  // Export to top of viewer
+                     // when user selects this node
+                     1,                  // One integer in this row/parameter
+                     &PRMdivName,        // Name of this parameter - must be static
+                     fiveDefault,        // Default for this parameter - ditto
+                     0,                  // Menu for this parameter
+                     &PRMdivision2Range  // Valid range
+         ),
+         PRM_Template(PRM_XYZ,    2, &PRMradiusName, anotherDefaults),
+         PRM_Template(PRM_TOGGLE, 1, negativeName),
+         PRM_Template(PRM_XYZ,    3, &PRMcenterName),
+         PRM_Template(PRM_ORD,    1, &PRMorientName, 0, &PRMplaneMenu),
+         PRM_Template()
     });
-    
+
+
     OP_Operator * op = new OP_Operator(
         "hdk_dualstar",                 // Internal name
         "Dual Star",                    // UI name
         SOP_DualStar::myConstructor,    // How to build the SOP
-        /* SOP_DualStar::myTemplateList,   */
-/*SOP_DualStar::parms.myTemplateList,*/
-        vvv->data(),
+        myTemplateList->data(),
         1,                          // Min # of sources
         1,                          // Max # of sources
         0,                          // Local variables
         OP_FLAG_GENERATOR,          // Flag it as generator
         0,                          // labels
         2);                         // Outputs.
-   
+
     std::cout << "Addding new operator: " << "HDK star" << std::endl;
     table->addOperator(op);
     g_op = op;
 
     VersionCounter& counter = VersionCounter::getInstance();
     cout << " dso ver:" << counter.dso_version << endl;
-    
+
     if (counter.dso_version == 0){
         OP_Director * dir = OPgetDirector();
         const char * abc =  "abc";
@@ -254,6 +227,5 @@ newSopOperator(OP_OperatorTable *table)
     }
 
     counter.dso_version++;
-        
-}
 
+}
