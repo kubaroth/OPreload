@@ -21,9 +21,10 @@ using std::cout;
 using std::endl;
 
 
-PRM_Name     negativeName("nradius", "Negative Radius");
-PRM_Default  fiveDefault(6);     // Default to 5 divisions
-PRM_Default  radiiDefaults[] = {
+static PRM_Name     negativeName("nradius", "Negative Radius");
+static PRM_Name     negativeName2("nradius2", "Negative Radius2");
+static PRM_Default  fiveDefault(6);     // Default to 5 divisions
+static PRM_Default  radiiDefaults[] = {
     PRM_Default(1),      // Outside radius
     PRM_Default(0.3)     // Inside radius
 };
@@ -199,8 +200,8 @@ void
 newSopOperator(OP_OperatorTable *table)
 {
 
-    PRM_Name     * negativeName = new PRM_Name ("nradius", "Negative Radius");
-    PRM_Name     * negativeName2 = new PRM_Name ("nradius2", "Negative Radius2");
+    PRM_Name     * nname1 = new PRM_Name ("nradius", "nname1");
+    PRM_Name     * nname2 = new PRM_Name ("nradius2", "nname2");
     // PRM_Default  fiveDefault(6);     // Default to 5 divisions
     PRM_Default  radiiDefaults[] = {
         PRM_Default(1),      // Outside radius
@@ -208,8 +209,11 @@ newSopOperator(OP_OperatorTable *table)
     };
 
     std::vector<PRM_Template> * vvv = new std::vector<PRM_Template>();
-    auto p1 = PRM_Template(PRM_TOGGLE, 1, negativeName);
-    auto p2 = PRM_Template(PRM_TOGGLE, 1, negativeName2);
+    auto _p1 = PRM_Template(PRM_TOGGLE, 1, &negativeName);
+    auto _p2 = PRM_Template(PRM_TOGGLE, 1, &negativeName2);
+    auto p1 = PRM_Template(PRM_TOGGLE, 1, nname1);
+    auto p2 = PRM_Template(PRM_TOGGLE, 1, nname2);
+
     auto pend = PRM_Template();
     vvv->push_back(p1);
     vvv->push_back(p2);
