@@ -8,7 +8,6 @@
 #include <sstream>
 
 #include <string>
-#include <regex>
 #include <iomanip>  // setw
 #include <stdio.h>  // remove file
 
@@ -53,6 +52,7 @@ std::vector<std::string> glob(const std::string& pattern) {
     return filenames;
 }
 
+
 // https://stackoverflow.com/questions/1008019/c-singleton-design-pattern
 class VersionCounter
 {
@@ -91,6 +91,25 @@ public:
     int dso_version = 0;
 };
 
+
+std::string extract_base_name(std::string filename){
+    // Remove directory if present.
+    // Do this before extension removal incase directory has a period character.
+    const size_t last_slash_idx = filename.find_last_of("/");
+    if (std::string::npos != last_slash_idx){
+        filename.erase(0, last_slash_idx + 1);
+    }
+
+    // Remove extension if present.
+    const size_t period_idx = filename.rfind('.');
+    if (std::string::npos != period_idx){
+        filename.erase(period_idx);
+    }
+
+    return filename;
+}
+
+
 OP_ERROR reload_callback(std::basic_ostream<char>& a, void* b){
 
     using std::cout;
@@ -98,37 +117,22 @@ OP_ERROR reload_callback(std::basic_ostream<char>& a, void* b){
 
     // Increment dso file - copy the original
     std::string directory = PLUGIN_DIR;
-    std::string base_name = "libhoudini_reload"; // TODO replace with regex
-    
+
     auto list = glob(directory + '/' + "*.so");
     int total_files = list.size();
-
-    // TODO:
-    // /// Extract base name
-    // std::smatch m;
-    // // get full path any file with the same base name we are after
-    // std::string s = list[0];
-    // std::regex str_expr ("[a-z_A-Z]{3,}");
-
-    // // base file name is the last match (longer then 3 characters)
-    // std::string base_name1;
-    
-    // while (std::regex_search (s, m, str_expr)){
-    //     base_name1 = m[0];
-    //     cout << base_name1 <<endl;
-    //     s = m.suffix().str();
-    // }
-    // cout << "_______"<< base_name1 <<endl;
-    
-    // increment version and add the padding
-    std::stringstream ss;
-    ss << std::setfill('0') << std::setw(5) << std::to_string(total_files + 1);
-
-    std::string dest = directory + '/' + base_name + ss.str() + ".so";
 
     // Update plugin
 
     if (total_files > 0){
+        // increment version and add the padding
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(5) << std::to_string(total_files + 1);
+
+        // std::string base_name = "libhoudini_reload"; // TODO replace with regex
+        std::string base_name = extract_base_name(list[0]);
+
+        std::string dest = directory + '/' + base_name + ss.str() + ".so";
+
         cout << "built file: " << list[0] << endl; // first one in the list
 
         // Copy dso just built
@@ -140,5 +144,6 @@ OP_ERROR reload_callback(std::basic_ostream<char>& a, void* b){
         g_table->requestReload();
         g_table->loadDSO(dest.c_str());
     }
+
     return UT_ERROR_NONE;
 }
