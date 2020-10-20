@@ -3,7 +3,8 @@ A custom HDK operator example with an option to reload changes at runtime, to re
 - Changes to existing parameters should work as well.
 - Adding new GUI parameters is currently not possible. (See notes for details).
 
-[![demo1 - workflow](./images/demo1.png)](./images/demo1.mp4)
+[![demo1 - workflow](./images/demo1.png)](https://kubaroth.github.io/OPreload/images/demo1.mp4)
+
 
 ## Build:
 Update the CMakeLists.txt to point to Houdini installation directory ($HFS).
